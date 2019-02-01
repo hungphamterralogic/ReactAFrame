@@ -3,22 +3,18 @@ import 'aframe-animation-component';
 import 'aframe-particle-system-component';
 import 'aframe-mouse-cursor-component'
 import 'babel-polyfill';
-import { Entity, Scene } from 'aframe-react';
 import React from 'react';
 import _ from 'lodash';
-// import ReactDOM from 'react-dom';
+import { Tooltip } from 'react-tippy';
+import 'react-tippy/dist/tippy.css';
 
-import Player from './../player';
-import Portal from './../portal';
+import ImageScreen from './imageScreen';
+import VideoScreen from './videoScreen';
 
-import mountainImage from './assets/puydesancy.jpg';
-import locationIcon from './assets/location.png';
-import flagIcon from './assets/flag.png';
+import landImage from './assets/land.jpg';
 import penguinsVideo from './assets/penguins.mp4';
 import seagullsVideo from './assets/seagulls.mp4';
 import sharksVideo from './assets/sharks.mp4';
-import closeIcon from './assets/close.png';
-import playIcon from './assets/play.png';
 
 const VIDEO_BY_ID = {
   penguins: penguinsVideo,
@@ -26,37 +22,47 @@ const VIDEO_BY_ID = {
   sharks: sharksVideo
 }
 
+const IMGAGE_BY_ID = {
+  land: landImage
+}
+
 class Screen360 extends React.Component {
   constructor(props) {
     super(props);
-    console.log(props.metadata);
+
+    const { metadata: screens, screenId } = props;
+
+    const screen = screens.length > 0 ? screens[screenId] : { type: "image", url: null };
 
     this.state = {
+      tooltip: null,
       color: 'red',
       info: null,
       firstLoad: true,
       isPlaying: false,
       currentTime: 0,
       duration: 0,
-      source: {
-        isVideo: true,
-        srcUrl: penguinsVideo
-      },
-      hideAllPortal: false
+      currentScreenMetaData: screen,
+      isVideo: screen.type == "video",
+      srcUrl: screen.type == "video" ? VIDEO_BY_ID[screen.url] : IMGAGE_BY_ID[screen.url],
+      hideAllPortal: false,
+      isSwitching: false
     };
     this.videoELement = null;
   }
 
-  getHotspotFromId = id => _.find(this.props.metadata, h => h.id == id);
+  getScreenFromId = id => _.find(this.props.metadata, s => s.id == id);
+
+  getHotspotFromId = id => _.find(this.state.currentScreenMetaData.hotspots, h => h.id == id);
+
+  getToolTipFromId = id => {
+    const hotspot = this.getHotspotFromId(id);
+    return hotspot ? hotspot.tooltip : "";
+  }
 
   getInfoPortalFromId = id => {
     const hotspot = this.getHotspotFromId(id);
     return hotspot ? hotspot.info : "";
-  }
-
-  getNextUrlFromId = id => {
-    const hotspot = this.getHotspotFromId(id);
-    return hotspot ? hotspot.nextUrl : "";
   }
 
   onClickPortal = (type, id) => {
@@ -64,13 +70,46 @@ class Screen360 extends React.Component {
     if(type=="teleport") return () => this.handleClickTeleportPortal(id);
   }
 
+  onHoverPortal = (id) => {
+    this.setState({ tooltip: this.getToolTipFromId(id) });
+  }
+
+  onBlurPortal = (id) => {
+    this.setState({ tooltip: null });
+  }
+
   handleClickInfoPortal = id => {
+    console.log(id, '===',this.getInfoPortalFromId(id))
     this.setState({ info: this.getInfoPortalFromId(id), isPlaying: false });
-    this.videoELement.pause();
+    if(this.videoELement) this.videoELement.pause();
   }
 
   handleClickTeleportPortal = id => {
-    this.setState({ source: { isVideo: true, srcUrl: VIDEO_BY_ID[this.getNextUrlFromId(id)] } });
+    if(this.videoELement) this.videoELement.pause();
+    const { nextId } = this.getHotspotFromId(id);
+    const screen = this.getScreenFromId(nextId);
+    this.switchScreen(screen);
+  }
+
+  switchScreen = screen => {
+    let t = 2;
+    let intervalSwitch = setInterval(()=> {
+      this.setState({isSwitching: true});
+      t--;
+      if (t<=0) {
+        clearInterval(intervalSwitch);
+        this.setState({
+          isVideo: screen.type === "video",
+          srcUrl: screen.type === "video" ? VIDEO_BY_ID[screen.url] : IMGAGE_BY_ID[screen.url],
+          currentScreenMetaData: screen,
+          firstLoad: true,
+          tooltip: null,
+          isSwitching: false
+        });
+
+        this.props.onChangeScreen(screen.id);
+      }
+    }, 200);
   }
 
   handleCollide = () => {
@@ -120,106 +159,109 @@ class Screen360 extends React.Component {
   }
 
   componentDidMount() {
-    this.videoELement = document.getElementById("video");
-    this.videoELement.pause();
+    var cameraEl = document.querySelector('#camera');
+    var worldPos = new THREE.Vector3();
+    worldPos.setFromMatrixPosition(cameraEl.object3D.matrixWorld);
+    const handleChangeCamera = rotation => this.props.onChangeCamera(rotation);
+    cameraEl.addEventListener('componentchanged', function (evt) {
+      if (evt.detail.name !== 'rotation') { return; }
+      const { x , y, z } = evt.detail.newData;
+      handleChangeCamera({x , y, z });
+    });
   }
 
+  onLoadedVideo = () => {
+    this.videoELement = document.getElementById("video");
+    this.videoELement.pause();
+    if(this.state.firstLoad) setTimeout(() => document.getElementById('playvideo').click(), 500);
+    // this.videoELement.play();
+  }
+
+  renderImageScreen = (isVideo, info, srcUrl, currentScreenMetaData, isEditorMode) => (
+    <ImageScreen 
+      show={!isVideo}
+      info={info}
+      source={{isVideo, srcUrl}}
+      metadata={currentScreenMetaData}
+      onHoverPortal={this.onHoverPortal}
+      onBlurPortal={this.onBlurPortal}
+      onClickPortal={this.onClickPortal}
+      onCloseInfo={this.onCloseInfo}
+      isEditorMode={isEditorMode}
+    />
+  )
+
+  renderVideoScreen = (isVideo, info, duration, currentTime, isPlaying, hideAllPortal, srcUrl, firstLoad, currentScreenMetaData, isEditorMode) => (
+    <VideoScreen
+      isEditorMode={isEditorMode}
+      show={isVideo}
+      firstLoad={firstLoad}
+      info={info}
+      duration={duration}
+      currentTime={currentTime}
+      isPlaying={isPlaying}
+      hideAllPortal={hideAllPortal}
+      source={{isVideo, srcUrl}}
+      metadata={currentScreenMetaData}
+      onLoadedMetadata={this.onLoadedMetadata}
+      onTimeUpdate={this.onTimeUpdate}
+      onHoverPortal={this.onHoverPortal}
+      onBlurPortal={this.onBlurPortal}
+      onClickPortal={this.onClickPortal}
+      onCloseInfo={this.onCloseInfo}
+      onPlayClick={this.onPlayClick}
+      onChangeTime={this.onChangeTime}
+      onTogglePlay={this.onTogglePlay}
+      onFullScreen={this.onFullScreen}
+      onLoadedVideo={this.onLoadedVideo}
+    />
+  )
+
   render() {
-    const { info, duration, currentTime, isPlaying, hideAllPortal, source: { isVideo, srcUrl} } = this.state;
-    const { metadata: {hotspots} } = this.props;
+    const { tooltip, isVideo, info, duration, currentTime, isPlaying, hideAllPortal, srcUrl, firstLoad, currentScreenMetaData, isSwitching } = this.state;
+    const { isEditorMode } = this.props;
     return (
-      <div>
-        <Scene>
-          <a-assets>
-            <img id="groundTexture" src="https://cdn.aframe.io/a-painter/images/floor.jpg" />
-            <img id="skyTexture" src="https://cdn.aframe.io/a-painter/images/sky.jpg" />
-            <video id="video"
-              preload="metadata"
-              controls
-              src={srcUrl}
-              onTimeUpdate={this.onTimeUpdate}
-              onLoadedMetadata={this.onLoadedMetadata}
-            />
-            <img id="location" src={locationIcon} />
-            <img id="flag" src={flagIcon} />
-            <img id="mountain" src={mountainImage} />
-          </a-assets>
-
-          <Entity primitive="a-light" type="ambient" color="#445451" />
-          <Entity primitive="a-light" type="point" intensity="2" position="2 4 4" />
-          <Entity primitive="a-sky" src="#video" rotation="0 -130 0" />
-
-          {/* <Portal type="info" title="rockyyyyyyyyyyyyy" position={{x:1, y:0.75, z:-3}} onClickPortal={this.onClickPortal("info")} />
-          <Portal type="teleport" title="rocky" position={{x:-5, y:0.9, z:6}} onClickPortal={this.onClickPortal("info")} /> */}
-          {hotspots.map(({type, position, title, id}, index) => <Portal key={index} type={type} title={title} position={position} onClickPortal={this.onClickPortal(type, id)} />)}
-
-          {/* <Entity text={{ value: 'Hello, A-Frame React!', align: 'center' }} position={{ x: 0, y: 2, z: -1 }} /> */}
-          <Entity primitive="a-camera" mouse-cursor>
-          </Entity>
-        </Scene>
-
-        {info && <div style={{
-          width: 500,
-          height: 200,
-          margin: '5% auto',
-          left: 0,
-          right: 0,
-          position: 'fixed',
-          borderRadius: 10,
-          boxShadow: '3px 3px 10px black',
-          background: '#000000cc',
-          color: 'white',
-          padding: 10
-        }}>
-          <img
-            style={{
-              width: 24,
-              height: 24,
-              position: 'absolute',
-              right: '-15px',
-              top: '-15px',
-            }}
-            src={closeIcon}
-            onClick={this.onCloseInfo}
-          />
-          {info}
-        </div>}
-
-        {this.state.firstLoad && <div
-          style={{
-            left: 0,
-            right: 0,
-            top: 0,
-            bottom: 0,
-            position: 'fixed'
-          }}
-          onClick={this.onPlayClick}
-        >
-          <img
-            style={{
-              margin: '5% auto',
-              left: 0,
-              right: 0,
-              position: 'fixed',
-              opacity: 0.5,
-              color: 'white',
-              padding: 10
-            }}
-            src={playIcon}
-            id="playButton"
-          />
-        </div>
+      <Tooltip
+        style={{
+          display: 'flex',
+          width: '100%',
+          height: '100%',
+          position: 'relative',
+        }}
+        open={Boolean(tooltip)}
+        unmountHTMLWhenHide
+        html={(
+          <div>
+            {tooltip}
+          </div>
+        )}
+        position="top-end"
+        followCursor
+      >
+        { 
+          isSwitching ?
+          <div />
+          :
+          !isVideo ?
+          this.renderImageScreen(isVideo, info, srcUrl, currentScreenMetaData, isEditorMode)
+          : this.renderVideoScreen(isVideo, info, duration, currentTime, isPlaying, hideAllPortal, srcUrl, firstLoad, currentScreenMetaData, isEditorMode)
         }
-
-        <Player
-          currentTime={currentTime}
-          duration={duration}
-          isPlaying={isPlaying}
-          onChangeTime={this.onChangeTime}
-          onTogglePlay={this.onTogglePlay}
-          onFullScreen={this.onFullScreen}
-        />
-      </div>
+        { isEditorMode &&
+          <img
+            style={{
+              position: 'absolute',
+              top: "50%",
+              left: "50%",
+              width: 20,
+              height: 20,
+              marginLeft: -10,
+              marginTop: -10,
+              zIndex: 99
+            }}
+            src="http://babafoundation.org/wp-content/uploads/2018/08/iconmonstr-location-16-icon-256-1.png"
+          />
+        }
+      </Tooltip>
     );
   }
 }

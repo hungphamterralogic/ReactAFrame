@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import injectSheet from 'react-jss';
-// import c from 'classnames';
+import c from 'classnames';
 import Slider from 'react-rangeslider';
 
 import './styles.css';
@@ -10,7 +10,7 @@ import pauseIcon from './imgs/whitepause.png';
 import fullScreenIcon from './imgs/whitefullscreen.png';
 
 const Player = props => {
-  const { classes, onTogglePlay, onFullScreen, onChangeTime, currentTime, duration, isPlaying } = props;
+  const { classes, onTogglePlay, onFullScreen, onChangeTime, currentTime, duration, isPlaying, isEditorMode } = props;
   const [time, setTime] = useState(currentTime);
   const [change, setChange] = useState(false);
 
@@ -37,7 +37,7 @@ const Player = props => {
   }
 
   return (
-    <div className={classes.player}>
+    <div className={c(classes.player, {[classes.editMode]: isEditorMode})}>
       <img
         alt=""
         className={classes.icon}
@@ -73,9 +73,12 @@ const styles = {
     right: 0,
     height: 50,
     bottom: 0,
-    position: 'fixed',
+    position: 'absolute',
     background: '#00000080',
     display: 'flex'
+  },
+  editMode: {
+    left: 200,
   },
   icon: {
     height: 30,
