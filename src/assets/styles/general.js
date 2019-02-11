@@ -1,6 +1,6 @@
 const styles = {
   root: {
-    flexGrow: 1,
+    flexGrow: 1
   },
   zIndex2: {
     zIndex: 2
@@ -10,7 +10,7 @@ const styles = {
     height: '100%'
   },
   flexDisplay: {
-    display: 'flex',
+    display: 'flex'
   },
   flexColumn: {
     display: 'flex',
@@ -32,7 +32,7 @@ const styles = {
     color: 'white',
     '&:hover': {
       color: 'lightblue'
-    },
+    }
   },
   linkDark: {
     color: 'darkgray',
@@ -54,12 +54,12 @@ const styles = {
       content: '""',
       zIndex: 0,
       position: 'absolute',
-      background: '#fff',
+      background: '#fff'
     }
   },
   menuButton: {
     marginLeft: -18,
-    marginRight: 10,
+    marginRight: 10
   },
   fullAbsolute: {
     position: 'absolute',

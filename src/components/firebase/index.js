@@ -1,3 +1,1 @@
-import Firebase from './firebase';
-
-export default Firebase;
+export { default } from './firebase';

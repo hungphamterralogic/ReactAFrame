@@ -4,7 +4,7 @@ const dataConfig = {
   REACT_APP_DATABASE_URL: 'https://test-project-bb618.firebaseio.com',
   REACT_APP_PROJECT_ID: 'test-project-bb618',
   REACT_APP_STORAGE_BUCKET: 'test-project-bb618.appspot.com',
-  REACT_APP_MESSAGING_SENDER_ID: 753412379471,
-}
+  REACT_APP_MESSAGING_SENDER_ID: 753412379471
+};
 
 export default dataConfig;

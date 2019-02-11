@@ -1,3 +1,4 @@
+/* global firebase */
 import app from 'firebase/app';
 import 'firebase/auth';
 import 'firebase/storage';
@@ -34,58 +35,41 @@ class Firebase {
     this.storage = app.storage().ref();
   }
 
-  // doCreateUserWithEmailAndPassword = (email, password) =>
-  //   this.auth.createUserWithEmailAndPassword(email, password);
-
-  // doSignInWithEmailAndPassword = (email, password) =>
-  //   this.auth.signInWithEmailAndPassword(email, password);
-
-  // doSignOut = () => this.auth.signOut();
-
-  // doPasswordReset = email => this.auth.sendPasswordResetEmail(email);
-
-  // doPasswordUpdate = password =>
-  //   this.auth.currentUser.updatePassword(password);
-
-  // user = uid => this.db.ref(`users/${uid}`);
-
-  // users = () => this.db.ref('users');
-
   getStorage = () => this.storage;
 
-  getImageUrl = async (image) => {
+  getImageUrl = async image => {
     let urlImage = '';
-    await this.storage.child(`${image}`).getDownloadURL().then((url) => {
-      urlImage = url;
-    }).catch((error) => {
-      return urlImage;
-    });
+    await this.storage
+      .child(`${image}`)
+      .getDownloadURL()
+      .then(url => {
+        urlImage = url;
+      })
+      .catch(() => urlImage);
 
     return urlImage;
-  }
+  };
 
-  uploadFile = async (file) => {
-    // Create the file metadata
-    // var metadata = {
-    //   contentType: 'image/jpeg'
-    // };
+  uploadFile = async file => {
+    const uploadTask = this.storage.child(`images/${file.name}`).put(file);
 
-    const uploadTask = this.storage.child('images/' + file.name).put(file);
-
-    uploadTask.on(firebase.storage.TaskEvent.STATE_CHANGED, // or 'state_changed'
-      function(snapshot) {
+    uploadTask.on(
+      firebase.storage.TaskEvent.STATE_CHANGED,
+      snapshot => {
         const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-        console.log('Upload is ' + progress + '% done');
+        console.log(`Upload is ${progress}% done`);
         switch (snapshot.state) {
-          case firebase.storage.TaskState.PAUSED: // or 'paused'
+          case firebase.storage.TaskState.PAUSED:
             console.log('Upload is paused');
             break;
-          case firebase.storage.TaskState.RUNNING: // or 'running'
+          case firebase.storage.TaskState.RUNNING:
             console.log('Upload is running');
             break;
+          default:
+            break;
         }
-      }, 
-      (error) => {
+      },
+      error => {
         switch (error.code) {
           case 'storage/unauthorized':
             break;
@@ -93,15 +77,17 @@ class Firebase {
             break;
           case 'storage/unknown':
             break;
+          default:
+            break;
         }
-      }, 
+      },
       () => {
-        uploadTask.snapshot.ref.getDownloadURL().then(function(downloadURL) {
+        uploadTask.snapshot.ref.getDownloadURL().then(downloadURL => {
           console.log('File available at', downloadURL);
         });
       }
     );
-  }
+  };
 }
 
 export default Firebase;

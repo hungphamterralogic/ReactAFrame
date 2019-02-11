@@ -1,3 +1,5 @@
+/* eslint-disable jsx-a11y/no-noninteractive-element-interactions */
+/* eslint-disable jsx-a11y/click-events-have-key-events */
 import React, { useState } from 'react';
 import injectSheet from 'react-jss';
 import c from 'classnames';
@@ -10,7 +12,16 @@ import pauseIcon from './imgs/whitepause.png';
 import fullScreenIcon from './imgs/whitefullscreen.png';
 
 const Player = props => {
-  const { classes, onTogglePlay, onFullScreen, onChangeTime, currentTime, duration, isPlaying, isEditorMode } = props;
+  const {
+    classes,
+    onTogglePlay,
+    onFullScreen,
+    onChangeTime,
+    currentTime,
+    duration,
+    isPlaying,
+    isEditorMode
+  } = props;
   const [time, setTime] = useState(currentTime);
   const [change, setChange] = useState(false);
 
@@ -27,17 +38,19 @@ const Player = props => {
     onChangeTime(time);
   };
 
-  const addZero = num => num < 10 ? "0"+num : num;
+  const addZero = num => (num < 10 ? `0${num}` : num);
 
   const convertTime = sTime => {
     const hrs = Math.floor(sTime / 3600);
     const mins = Math.floor((sTime % 3600) / 60);
     const secs = Math.floor(sTime % 60);
-    return hrs > 0 ? hrs + ":" + addZero(mins) + ":" + addZero(secs) : addZero(mins) + ":" + addZero(secs);
-  }
+    return hrs > 0
+      ? `${hrs}:${addZero(mins)}:${addZero(secs)}`
+      : `${addZero(mins)}:${addZero(secs)}`;
+  };
 
   return (
-    <div className={c(classes.player, {[classes.editMode]: isEditorMode})}>
+    <div className={c(classes.player, { [classes.editMode]: isEditorMode })}>
       <img
         alt=""
         className={classes.icon}
@@ -54,7 +67,7 @@ const Player = props => {
         onChangeComplete={handleChangeComplete}
       />
       <div className={classes.timeStatus}>
-        {convertTime(currentTime)}/{convertTime(duration)}
+        {`${convertTime(currentTime)}/${convertTime(duration)}`}
       </div>
       <img
         alt=""
@@ -64,8 +77,8 @@ const Player = props => {
         id="playButton"
       />
     </div>
-  )
-}
+  );
+};
 
 const styles = {
   player: {
@@ -78,13 +91,13 @@ const styles = {
     display: 'flex'
   },
   editMode: {
-    left: 200,
+    left: 200
   },
   icon: {
     height: 30,
     width: 30,
     opacity: 0.8,
-    padding: 10,
+    padding: 10
   },
   timeStatus: {
     display: 'flex',
@@ -92,7 +105,6 @@ const styles = {
     alignItems: 'center',
     padding: 10
   }
-}
+};
 
 export default injectSheet(styles)(Player);
-

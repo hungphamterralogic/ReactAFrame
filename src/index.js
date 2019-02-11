@@ -1,4 +1,4 @@
-
+/* global document */
 import React from 'react';
 import ReactDOM from 'react-dom';
 
@@ -9,16 +9,18 @@ import rootReducer from './rootReducer';
 import Firebase from './components/firebase';
 import App from './components/app';
 import './styles.css';
-// import Screen360 from './components/screen360';
 
 const initialAppReducer = {
   firebase: new Firebase(),
   authUser: null
-}
-const store = createStore(rootReducer, { 'app': initialAppReducer})
+};
 
-// import input from './input/demo.json';
+const store = createStore(rootReducer, { app: initialAppReducer });
 
-// const App = () => <Screen360 metadata={input} />;
+const app = () => (
+  <Provider store={store}>
+    <App />
+  </Provider>
+);
 
-ReactDOM.render(<Provider store={store}><App /></Provider>, document.querySelector('#sceneContainer'));
+ReactDOM.render(app, document.querySelector('#sceneContainer'));

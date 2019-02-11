@@ -7,7 +7,7 @@
     "hotspots": [
       {
         "id": "0",
-        "position": {"x":0, "y":1, "z":1},
+        "position": { "x": 0, "y": 1, "z": 1 },
         "radius": "0.5",
         "type": "info",
         "info": "This is a Rock and it's very ... ROCK!",
@@ -16,17 +16,17 @@
       },
       {
         "id": "1",
-        "position": {"x":1, "y":0.75, "z":-3},
+        "position": { "x": 1, "y": 0.75, "z": -3 },
         "radius": "0.5",
         "type": "info",
-        
+
         "info": "This is a Rock and it's very ... ROCK!",
         "title": "",
         "tooltip": "Rocky"
       },
       {
         "id": "2",
-        "position": {"x":7, "y":0.9, "z":-2},
+        "position": { "x": 7, "y": 0.9, "z": -2 },
         "radius": "0.5",
         "type": "teleport",
         "fromSecond": 1,
@@ -37,12 +37,12 @@
       },
       {
         "id": "3",
-        "position": {"x":-5, "y":0.9, "z":6},
+        "position": { "x": -5, "y": 0.9, "z": 6 },
         "radius": "0.5",
         "type": "teleport",
         "fromSecond": 1,
         "toSecond": 29,
-        "nextId" : "screen2",
+        "nextId": "screen2",
         "title": "",
         "tooltip": "Go to the grassland"
       }
@@ -56,7 +56,7 @@
     "hotspots": [
       {
         "id": "1",
-        "position": {"x":1, "y":0.75, "z":-7},
+        "position": { "x": 1, "y": 0.75, "z": -7 },
         "radius": "0.5",
         "type": "info",
         "info": "This is the grass and it's very ... GREEN!",
@@ -65,7 +65,7 @@
       },
       {
         "id": "2",
-        "position": {"x":8, "y":0.9, "z":-6},
+        "position": { "x": 8, "y": 0.9, "z": -6 },
         "radius": "0.5",
         "type": "teleport",
         "nextId": "screen3",
@@ -74,7 +74,7 @@
       },
       {
         "id": "3",
-        "position": {"x":5, "y":0.9, "z":9},
+        "position": { "x": 5, "y": 0.9, "z": 9 },
         "radius": "0.5",
         "type": "teleport",
         "nextId": "screen1",
@@ -91,7 +91,7 @@
     "hotspots": [
       {
         "id": "1",
-        "position": {"x":-2, "y":0.75, "z":4},
+        "position": { "x": -2, "y": 0.75, "z": 4 },
         "radius": "0.5",
         "type": "info",
         "info": "This is the sand and it's yellow and ... white!",
@@ -100,7 +100,7 @@
       },
       {
         "id": "2",
-        "position": {"x":4, "y":0.9, "z":6},
+        "position": { "x": 4, "y": 0.9, "z": 6 },
         "radius": "0.5",
         "type": "teleport",
         "nextId": "screen1",
@@ -109,7 +109,7 @@
       },
       {
         "id": "3",
-        "position": {"x":3, "y":0.9, "z":-10},
+        "position": { "x": 3, "y": 0.9, "z": -10 },
         "radius": "0.5",
         "type": "teleport",
         "nextId": "screen2",
